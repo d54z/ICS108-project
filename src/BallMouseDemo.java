@@ -389,7 +389,7 @@ public class BallMouseDemo extends Application {
 
 
         // running the game //
-
+        // lastest version
         gameTimeLine = new Timeline(new KeyFrame(Duration.seconds(1.75), eveynt -> {
             Star star = new Star();
             for (Line line : star.getLines()) {
