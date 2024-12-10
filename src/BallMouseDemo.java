@@ -7,6 +7,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
@@ -23,6 +25,7 @@ import java.util.Scanner;
 //here we created the class called BallMouseDemo and  extended Application to access some methods
 class Star {
     // array of starting points
+    static int count = 1;
     private double growthFactor = 1.0;
     //here we are adjusting 10 different  points in order to make the star
     private double[] startingPoints = {
@@ -40,10 +43,20 @@ class Star {
     //here we are making a list of colors in order to loop over specific colors and prevent lacking the ball color in the star .
     // color template
     private Color[] colors = {
-            Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN,
-            Color.BLUE, Color.INDIGO, Color.VIOLET, Color.PINK,
-            Color.CYAN, Color.MAGENTA
+            Color.RED, Color.ORANGE, Color.YELLOW, Color.FORESTGREEN,
+            Color.DARKBLUE, Color.INDIGO, Color.VIOLET, Color.BROWN,
+            Color.DARKCYAN, Color.PURPLE
     };
+    LinearGradient rainbowGradient = new LinearGradient(0, 0, 1, 0, true, null,
+            new Stop(0, Color.RED),
+            new Stop(0.14, Color.ORANGE),
+            new Stop(0.28, Color.YELLOW),
+            new Stop(0.42, Color.GREEN),
+            new Stop(0.57, Color.CYAN),
+            new Stop(0.71, Color.BLUE),
+            new Stop(0.85, Color.INDIGO),
+            new Stop(1, Color.VIOLET)
+    );
     // random class to choose new color
     private Random rand = new Random();
 
@@ -57,11 +70,18 @@ class Star {
         for (int i = 0; i < startingPoints.length; i += 2) {
             int nextIndex = (i + 2) % startingPoints.length;  // Wrap around to form a closed polygon
             Line line = new Line(startingPoints[i], startingPoints[i + 1], startingPoints[nextIndex], startingPoints[nextIndex + 1]);
-            line.setStroke(colors[rand.nextInt(10)]);  // Set a different color for each line
+
+
+                line.setStroke(colors[rand.nextInt(10)]);
+            // Set a different color for each line
             line.setStrokeWidth(2);
             lines.add(line);  // Add the line to the pane
         }
-
+        if (count%10==0){
+            int index = rand.nextInt(10);
+            lines.get(index).setStroke(rainbowGradient);
+        }
+    count++;
     }
 
     // function to return lines to be shown on the pane
@@ -131,15 +151,18 @@ class Star {
         return touched;
     }
 
+
+
 }
 class Ball{
     private Random rand = new Random();
     private Circle circle;
     private Color[] colors = {
-            Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN,
-            Color.BLUE, Color.INDIGO, Color.VIOLET, Color.PINK,
-            Color.CYAN, Color.MAGENTA
+            Color.RED, Color.ORANGE, Color.YELLOW, Color.FORESTGREEN,
+            Color.DARKBLUE, Color.INDIGO, Color.VIOLET, Color.BROWN,
+            Color.DARKCYAN, Color.PURPLE
     };
+    private boolean canDrag = true;
     public Ball(double x, double y , double radius){
         this.circle = new Circle(x ,y, radius);
     }
@@ -154,6 +177,21 @@ class Ball{
     }
     public void setCenterY(double y){
         this.circle.setCenterY(y);
+    }
+    public boolean isDragable(){
+        return canDrag;
+    }
+    public void setDragable(boolean state){
+        canDrag = state;
+    }
+    public void reInitiate(){
+        canDrag = false;
+        int[] RandomX = {50,800-50,50,800-50};
+        int[] RandomY = {50,50,740,740};
+        int index = rand.nextInt(4);
+        setCenterX(RandomX[index]);
+        setCenterY(RandomY[index]);
+        setColorRandom();
     }
 }
 
@@ -200,33 +238,31 @@ class Player implements Comparable<Player>{
 
 public class BallMouseDemo extends Application {
     public void intializing(ArrayList<Player> pList ) throws IOException {
-        FileInputStream fileByteStream = null; // File input stream
-        Scanner inFS = null;
-        String name;
+        try {
+            FileInputStream fileByteStream = null; // File input stream
+            Scanner inFS = null;
+            String name;
 
-        fileByteStream = new FileInputStream("C:\\Users\\zahid\\IdeaProjects\\Proj\\src\\namesScores.csv");
-        inFS = new Scanner(fileByteStream);
+            fileByteStream = new FileInputStream("C:\\Users\\zahid\\IdeaProjects\\Proj\\src\\namesScores.csv");
+            inFS = new Scanner(fileByteStream);
 
-        while(inFS.hasNextLine()){
-            String[] columns = inFS.nextLine().split(",");
-            String tempName = columns[0];
-            int tempScore = Integer.parseInt(columns[1]);
-            Player p1 = new Player();
-            p1.setName(tempName);
-            p1.setScore(tempScore);
-            pList.add(p1);
-
-
+            while (inFS.hasNextLine()) {
+                String[] columns = inFS.nextLine().split(",");
+                String tempName = columns[0];
+                int tempScore = Integer.parseInt(columns[1]);
+                Player p1 = new Player();
+                p1.setName(tempName);
+                p1.setScore(tempScore);
+                pList.add(p1);
 
 
-        }
-        pList.sort(null);
+            }
+            pList.sort(null);
 
-        fileByteStream.close();
-
+            fileByteStream.close();
+        } catch(Exception e){return;}
 
     }
-    private int index = -1;
     public void startPage(Stage primaryStage){
 
         Text welcomeText = new Text("Welcome To The Game!!!");
@@ -242,7 +278,7 @@ public class BallMouseDemo extends Application {
         madeBy.setFill(Color.FORESTGREEN);
         madeBy.setFont(Font.font("Impact",20));
         madeBy.setX(600);
-        madeBy.setY(500);
+        madeBy.setY(700);
 
 
         gameName.setFill(Color.BISQUE);
@@ -260,7 +296,7 @@ public class BallMouseDemo extends Application {
         welcomeText.setFill(Color.FORESTGREEN);
         welcomeText.setFont(Font.font("Lucida Calligraphy",25));
         welcomeText.setX(255);
-        welcomeText.setY(200);
+        welcomeText.setY(350);
 
         dashboard.setTextFill(Color.RED);
         dashboard.setFont(Font.font(15));
@@ -273,7 +309,7 @@ public class BallMouseDemo extends Application {
         starting.setTextFill(Color.BLUE);
         starting.setFont(Font.font("Garamond",20));
         starting.setLayoutX(318);
-        starting.setLayoutY(320);
+        starting.setLayoutY(470);
 
 
 
@@ -282,7 +318,7 @@ public class BallMouseDemo extends Application {
         playerName.setEditable(true);
         playerName.setPromptText("Enter Your Name Here ");
         playerName.setLayoutX(295);
-        playerName.setLayoutY(250);
+        playerName.setLayoutY(400);
 
         ArrayList<Player> players = new ArrayList<Player>();
         try {
@@ -291,17 +327,11 @@ public class BallMouseDemo extends Application {
             throw new RuntimeException(e);
         }
 
-        for (Player p: players){
-            if(playerName.getText().equals(p.getName())){
-                index = players.indexOf(p);
 
-
-            }
-        }
 
 
         TextField finalPlayerName = playerName;
-        starting.setOnAction(event -> {gamePage(primaryStage,players,index, finalPlayerName.getText());});
+        starting.setOnAction(event -> {gamePage(primaryStage,players, finalPlayerName.getText());});
         dashboard.setOnAction(event -> {leaderBoardPage(primaryStage,players);});
 
 
@@ -309,13 +339,20 @@ public class BallMouseDemo extends Application {
 
         Pane root0 = new Pane();
         root0.getChildren().addAll(welcomeText,starting,dashboardTitle,dashboard,gameName,playerName,madeBy);
-        Scene scene0 = new Scene(root0, 800, 600);
+        Scene scene0 = new Scene(root0, 800, 780);
         scene0.getRoot().setStyle("-fx-background-color: lightblue;");
         primaryStage.setScene(scene0);
 
     }
-    public void update(ArrayList<Player> players, int index, int[] score, String text){
+    public void update(ArrayList<Player> players, int[] score, String text){
         int arrayScore;
+        int index = -1;
+        for(Player p:players){
+            if(text.equals(p.getName())){
+                index = players.indexOf(p);
+                break;
+            }
+        }
         if (index!=-1){
             arrayScore = players.get(index).getScore();
             if (score[0]>arrayScore){
@@ -346,18 +383,27 @@ public class BallMouseDemo extends Application {
 
     }
     private Timeline gameTimeLine;// main pain
+    private Timeline timeline;
 
-    public void gamePage(Stage primaryStage, ArrayList<Player> players, int index, String text){
+    public void gamePage(Stage primaryStage, ArrayList<Player> players, String text){
         final int[] playerScore = {0};
         Pane root = new Pane();
 
         //create ball and set proprties
-        Ball ball = new Ball(200,200,20);
+        Ball ball = new Ball(400,740,20);
         ball.setColorRandom();
         root.getChildren().add(ball.getCircle());
-        root.setOnMouseMoved(even -> {
-            ball.setCenterX(even.getX());
-            ball.setCenterY(even.getY());
+        ball.getCircle().setOnMousePressed(even -> {
+            ball.setDragable(true);
+        });
+        ball.getCircle().setOnMouseDragged(even1 -> {
+            if(ball.isDragable() && (even1.getX()>=0 && even1.getX() <=800) && (even1.getY()>=0 && even1.getY()<=780)) {
+                ball.setCenterX(even1.getX());
+                ball.setCenterY(even1.getY());
+            } else if(ball.isDragable()){
+                ball.setDragable(false);
+            }
+
         });
 
 
@@ -389,13 +435,13 @@ public class BallMouseDemo extends Application {
 
 
         // running the game //
-        // lastest version
+
         gameTimeLine = new Timeline(new KeyFrame(Duration.seconds(1.75), eveynt -> {
             Star star = new Star();
             for (Line line : star.getLines()) {
                 root.getChildren().add(line);
             }
-            Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.05), e -> {
+            timeline = new Timeline(new KeyFrame(Duration.seconds(0.05), e -> {
                 star.grow();
                 reactionTime[0] += 0.05; // increase the number mille second
                 for (Line l : star.getLines()){
@@ -408,23 +454,34 @@ public class BallMouseDemo extends Application {
                             star.setTouched(true); // interaction to be changed to true
                             score.setText("Your score: "+playerScore[0]);
                             reactionTime[1]++; // increase the number of starts touched
-                            reactionTimeLabel.setText("Your Average Reaction time: " + reactionTime[0]/reactionTime[1]);
+                            reactionTimeLabel.setText(String.format("Your Average Reaction time: %.2f",reactionTime[0]/reactionTime[1]));
+
+                        } else if (!(l.getStroke() instanceof Color) && !star.isTouched()){
+                            star.setVisible(false);
+                            playerScore[0]+=5;
+                            star.setTouched(true); // interaction to be changed to true
+                            score.setText("Your score: "+playerScore[0]);
+                            reactionTime[1]++; // increase the number of starts touched
+                            reactionTimeLabel.setText(String.format("Your Average Reaction time: %.2f",reactionTime[0]/reactionTime[1]));
 
                         }
 
 
 
-                        if (!(l.getStroke().equals(ball.getCircle().getFill())) && !star.isTouched()){// diffrent colors
+
+                        else if (!(l.getStroke().equals(ball.getCircle().getFill())) && !star.isTouched()){// diffrent colors
                             // interaction to be changed to true
                             reactionTime[1]++; // increase the number of starts touched
-                            reactionTimeLabel.setText("Your Average Reaction time: " + reactionTime[0]/reactionTime[1]);
+                            reactionTimeLabel.setText(String.format("Your Average Reaction time: %.2f",reactionTime[0]/reactionTime[1]));
 
                             if(tries.size()==1){
                                 // here we will switch scences
-                                // gameTimeLine.stop();
-                                update(players,index,playerScore,text);
+                                timeline.stop();
+                                gameTimeLine.stop();//solved by ending time line Yaseen
+
+                                update(players,playerScore,text);
                                 endPage(primaryStage,players);
-                                gameTimeLine.stop();
+
 
 
                             }
@@ -433,6 +490,7 @@ public class BallMouseDemo extends Application {
                                 tries.removeLast(); // remove last circle from tries array
                                 star.setVisible(false);
                                 star.setTouched(true);
+                                ball.reInitiate();
 
                             }
                         }
@@ -448,44 +506,67 @@ public class BallMouseDemo extends Application {
         }));
         gameTimeLine.setCycleCount(-1);
         gameTimeLine.play();
-
         Scene scene = new Scene(root, 800, 780, Color.BLACK);
         primaryStage.setScene(scene);
+
 
 
     }
     public void leaderBoardPage(Stage primaryStage, ArrayList<Player> players){
         ArrayList<Player> topPlayers = new ArrayList<>(players.subList(0, Math.min(5, players.size())));//3shan ya5th top 5
 
-        GridPane gridPane = new GridPane();
-        gridPane.setAlignment(Pos.CENTER);
-        gridPane.setHgap(50);
-        gridPane.setVgap(20);
+        Pane pane = new Pane();
+
+        Button returnButton = new Button("Start Page");
+
+        returnButton.setOnAction(event -> {startPage(primaryStage);});
 
         Label nameHeader = new Label("Name");
-        nameHeader.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        nameHeader.setStyle("-fx-font-size: 40px; -fx-font-weight: bold;");
         Label scoreHeader = new Label("Score");
-        scoreHeader.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-        gridPane.add(nameHeader, 0, 0);  // Header for "Name"
-        gridPane.add(scoreHeader, 1, 0); // Header for "Score"
+        scoreHeader.setStyle("-fx-font-size: 40px; -fx-font-weight: bold;");
+        Label leaderBoard = new Label("Leader Board Of Top 5 Achievers");
+        leaderBoard.setStyle("-fx-font-size: 50px; -fx-font-weight: bold;");
+        leaderBoard.setLayoutX(20);
+        leaderBoard.setLayoutY(0);
+
+        Label back = new Label("Back to Start Page");
+        back.setLayoutX(500);
+        back.setLayoutY(650);
+        back.setStyle("-fx-font-size: 30px;");
+
+
+
+        nameHeader.setLayoutX(225);
+        nameHeader.setLayoutY(100);
+        scoreHeader.setLayoutX(525);
+        scoreHeader.setLayoutY(100);
+        returnButton.setLayoutX(600);
+        returnButton.setLayoutY(700);
+        pane.getChildren().addAll(nameHeader,scoreHeader,returnButton,leaderBoard,back);
 
         for (int i = 0; i < topPlayers.size(); i++) {
             Label nameLabel = new Label(topPlayers.get(i).getName());
-            nameLabel.setStyle("-fx-font-size: 18px;");
+            nameLabel.setStyle("-fx-font-size: 30px;");
 
             Label scoreLabel = new Label(String.valueOf(topPlayers.get(i).getScore()));
-            scoreLabel.setStyle("-fx-font-size: 18px;");
+            scoreLabel.setStyle("-fx-font-size: 30px;");
+            nameLabel.setLayoutX(250);
+            nameLabel.setLayoutY(150+i*100);
+            scoreLabel.setLayoutX(550);
+            scoreLabel.setLayoutY(150+i*100);
 
-            gridPane.add(nameLabel, 0, i + 1);
-            gridPane.add(scoreLabel, 1, i + 1);
+            pane.getChildren().add(nameLabel);
+            pane.getChildren().add(scoreLabel);
         }
+        pane.setStyle("-fx-background-color: gold;");
 
-        Scene scene = new Scene(gridPane, 800, 780);
+        Scene scene = new Scene(pane, 800, 780);
         primaryStage.setScene(scene);
 
 
 
-    }
+}
     public void endPage(Stage primaryStage,ArrayList<Player> players){
         Text gameOver = new Text("Game Over \n       *_*");
         gameOver.setFont(Font.font(60));
