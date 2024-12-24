@@ -70,8 +70,5 @@ Flying Stars Game is an interactive JavaFX arcade-style game where players navig
 - Yaseen AlYaseen
 - Hamza Ammous
 
-## License
-This project is open-source. Please refer to the LICENSE file for details.
-
 ## Note
 The game's file paths are currently hardcoded and may need adjustment based on your local environment.
